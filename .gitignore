@@ -1,1 +1,6 @@
 env
+.pytest_cache
+latest_logs
+Player/__pycache__
+Player/archived_logs
+Player/latest_logs
