@@ -3,6 +3,7 @@ from copy import deepcopy
 import os
 from termcolor import colored
 from random import randint
+from StatAgent import StatAgent
 
 class letter_colors:
     DEFAULT = 'white'
@@ -11,11 +12,12 @@ class letter_colors:
     CORRECT = 'green'
 
 class Game:
-    def __init__(self):
+    def __init__(self, player=0):
         os.system('color')
 
         self.accepted_words = self.load_accepted_words()
         self.answer_words = self.load_answer_words()
+        self.ensure_all_answers_in_accepted_list()
 
         self.board = []
         self.board_mask = []
@@ -26,6 +28,14 @@ class Game:
         # for board coloring
         self.init_board_color_mask()
         self.init_key_mask()
+        
+        if player == 1:
+            self.agent = StatAgent(self.accepted_words)
+        
+        if player != 0:
+            self.known_letters = ['?', '?', '?', '?', '?']
+
+        
 
     def load_accepted_words(self):
         with open("accepted_guess_wordlist_shuffled.txt", "r") as f:
@@ -34,6 +44,13 @@ class Game:
     def load_answer_words(self):
         with open("answers_wordlist_shuffled.txt", "r") as f:
             return json.load(f)
+    
+    def ensure_all_answers_in_accepted_list(self):
+        for word in self.answer_words:
+            if word not in self.accepted_words:
+                self.accepted_words.append(word)
+        
+
 
     def init_board(self):
         for i in range(6):
@@ -89,12 +106,29 @@ class Game:
         word = None
         if player == 0:
             word = self.get_user_word()
-        
+
+        # stat agent
+        elif player == 1:
+            letters_left = self.get_available_letters()
+            word = self.agent.make_guess(letters_left, self.known_letters)
 
         return word
     
     def get_user_word(self):
         return(input("\n\nEnter your guess here: "))
+    
+    def get_available_letters(self):
+        available_letters = []
+        for i in range(len(self.keys)):
+            if self.key_mask[i] != letter_colors.INCORRECT:
+                available_letters.append(self.keys[i])
+        
+        return available_letters
+
+    def update_known_letters(self, word, current_guess):
+        for i in range(len(self.board_mask[current_guess])):
+            if self.board_mask[current_guess][i] == letter_colors.CORRECT:
+                self.known_letters[i] = word[i]
 
 
     def input_word(self, word, guess_num):
@@ -115,12 +149,19 @@ class Game:
 
 
 
-    def playGame(self, player=0):
+    def playGame(self, player):
         num_guesses = 6
         winner = False
         prev_word = None
 
         answer = self.answer_words[randint(0,len(self.answer_words)-1)]
+
+        if(player!=0):
+            print(f'The agent is hoping to find the word: {answer}!')
+            print(f'Lets see if it can...')
+
+        if answer not in self.accepted_words:
+            print(f'Gunna have a hard time finding this word since the answer isnt allowed as a guess...')
 
         for current_guess in range(num_guesses):
             self.show_keys()
@@ -137,9 +178,12 @@ class Game:
             self.update_mask(word, answer, current_guess)
             self.update_key_mask(word, answer)
 
+            if player != 0:
+                self.update_known_letters(word, current_guess)
+
             prev_word = word
         
-        if current_guess < num_guesses:
+        if current_guess < num_guesses-1:
             print("\n\n Congratulations!!")
         else:
             print("\n\n Better luck next time.")
@@ -148,5 +192,5 @@ class Game:
 
 
 #test
-game = Game()
-game.playGame()
+game = Game(1)
+game.playGame(1)
