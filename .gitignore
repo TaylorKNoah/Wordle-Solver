@@ -4,3 +4,4 @@ latest_logs
 Player/__pycache__
 Player/archived_logs
 Player/latest_logs
+*.pyc
