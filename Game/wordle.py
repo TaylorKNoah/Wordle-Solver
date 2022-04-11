@@ -163,11 +163,11 @@ class Game:
         if answer not in self.accepted_words:
             print(f'Gunna have a hard time finding this word since the answer isnt allowed as a guess...')
 
-        for current_guess in range(num_guesses):
-            self.show_keys()
-            print()
-            self.show_board()
+        self.show_keys()
+        print()
+        self.show_board()
 
+        for current_guess in range(num_guesses):
             if(self.has_won(prev_word, answer)): break
 
             word = None
@@ -182,13 +182,19 @@ class Game:
                 self.update_known_letters(word, current_guess)
 
             prev_word = word
+
+            self.show_keys()
+            print()
+            self.show_board()
         
-        if current_guess < num_guesses-1:
+
+        if current_guess < num_guesses:
             print("\n\n Congratulations!!")
         else:
             print("\n\n Better luck next time.")
         
         print("The correct word was: "+answer)
+       
 
 
 #test

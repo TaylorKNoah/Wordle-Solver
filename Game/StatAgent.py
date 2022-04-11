@@ -98,7 +98,7 @@ class StatAgent:
 		return highest_val_words[r]
 		
 
-	def get_valid_words(self, letters_left, known_letters, half_known_letters={}}):
+	def get_valid_words(self, letters_left, known_letters, half_known_letters={}):
 		valid_words = []
 
 		for word in self.word_list:
